@@ -20,4 +20,4 @@
 # setup parameters
 * waterPumpDefaultState : default water pump state (defaults to off == 0)
 * noDelayRefill : start tank fiil on low level with no delay (defaults to off == 0)
-* stopPumpOnLowLevel : stop water pump on low water level (defaults to on == 1)
+* stopPumpOnLowLevel : stop water pump on low water level (defaults to on == 1) 
