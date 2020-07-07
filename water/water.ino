@@ -4,9 +4,14 @@
 #include <Adafruit_Sensor.h>
 #include <ArduinoJson.h>
 
-// ---------flow sensor-----------//
+int update_interval = 15000;
+// ---------flow sensor pin setup-----------//
 byte sensorInterrupt = 0; // 0 = digital pin 2
 byte sensorPin = 2;
+
+/********************************************************************/
+// Data wire is plugged into pin 5 on the Arduino
+int ONE_WIRE_PIN =  5;
 
 // The hall-effect flow sensor outputs approximately 4.5 pulses per second per
 // litre/minute of flow.
@@ -21,11 +26,8 @@ unsigned long totalMilliLitres;
 unsigned long oldTime;
 
 /********************************************************************/
-// Data wire is plugged into pin 5 on the Arduino
-#define ONE_WIRE_BUS 5
-/********************************************************************/
 // Setup a oneWire instance to communicate with any OneWire devices
-OneWire oneWire(ONE_WIRE_BUS);
+OneWire oneWire(ONE_WIRE_PIN);
 /********************************************************************/
 // Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
@@ -62,11 +64,11 @@ void loop()
   /********************************************************************/
   sensors.requestTemperatures(); // Send the command to get temperature readings
   /********************************************************************/
-  json["water"]["temp"] =sensors.getTempCByIndex(0);
-  delay(15000);
+  json["water"]["temp"] = sensors.getTempCByIndex(0);
+  delay(update_interval);
 
   //------------flow rate-----------
-  if ((millis() - oldTime) > 15000) // Only process counters once per second
+  if ((millis() - oldTime) > update_interval) // Only process counters once per second
   {
     // Disable the interrupt while calculating flow rate and sending the value to
     // the host
@@ -77,7 +79,7 @@ void loop()
     // that to scale the output. We also apply the calibrationFactor to scale the output
     // based on the number of pulses per second per units of measure (litres/minute in
     // this case) coming from the sensor.
-    flowRate = ((15000.0 / (millis() - oldTime)) * pulseCount) / calibrationFactor;
+    flowRate = ((update_interval / (millis() - oldTime)) * pulseCount) / calibrationFactor;
 
     // Note the time this processing pass was executed. Note that because we've
     // disabled interrupts the millis() function won't actually be incrementing right
