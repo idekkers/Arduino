@@ -12,7 +12,7 @@ The system measures air and water data (all sensors optional)-
 ## optional inputs from web interface (Raspberry pi - json format)
 # TODO 
 - [ ] add json input for variables and pins
-- [ ] add tds sensor input
+- [x] add tds sensor input
 
 ### analog pin assignments
 * PHSensorPin: char - analog pin assignment for PH sensor (defaults to A0)
@@ -45,6 +45,9 @@ The system measures air and water data (all sensors optional)-
     },
     "ph":{
         "phvalue": int
+    },
+    "tds":{
+        "tdsvalue": float
     },
     "environment":{
         "light": int,

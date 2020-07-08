@@ -16,6 +16,8 @@ int update_interval = 1000;
  TODO color
  @param param
  */
+
+/* --------------------------- sensor pin setup -------------------------------*/
 /*
  *--------- PH pin setup --------------------
  */
@@ -25,18 +27,17 @@ char PHSensorPin = A0;
  *--------- TDS pin setup --------------------
  */
 char TDSSensorPin = A2;
+#define VREF 5.0                   // analog reference voltage(Volt) of the ADC
+#define SCOUNT 30                  // sum of sample point
+int analogBuffer[SCOUNT]; // store the analog value in the array, read from ADC
+int analogBufferTemp[SCOUNT];
+int analogBufferIndex = 0, copyIndex = 0;
+float averageVoltage = 0, tdsValue = 0, temperature = 25;
 
 /*
  *--------- Light sensor pin setup ----------
  */
 char LightSensorPin = A1;
-
-/*
- *--------- Water pump relay pin setup -----------
- */
-byte waterPumpRelayPin = 9;
-bool waterPumpDefaultState = false;
-unsigned long pumpOldTime;
 
 /*
  *--------- Water top level pin setup -----------
@@ -51,13 +52,6 @@ byte waterBottomLevelPin = 1;
 bool bottomLevelState = true;
 bool noDelayRefill = false;
 bool stopPumpOnLowLevel = true;
-
-/*
- *--------- Water fill selonoid pin setup -----------
- */
-byte waterFillSelonoidRelayPin = 8;
-bool fillSelonoidState = false;
-unsigned long fillOldTime;
 
 /*
  *--------- BME280 setup --------------------
@@ -86,6 +80,21 @@ OneWire oneWire(waterTempPin);
 // Pass our oneWire reference to Dallas Temperature.
 DallasTemperature sensors(&oneWire);
 
+/* --------------------------- relay pin setup -------------------------------*/
+/*
+ *--------- Water pump relay pin setup -----------
+ */
+byte waterPumpRelayPin = 9;
+bool waterPumpDefaultState = false;
+unsigned long pumpOldTime;
+
+/*
+ *--------- Water fill selonoid pin setup -----------
+ */
+byte waterFillSelonoidRelayPin = 8;
+bool fillSelonoidState = false;
+unsigned long fillOldTime;
+
 /********************************************************************/
 
 void setup()
@@ -99,6 +108,7 @@ void setup()
   pinMode(flowSensorPin, INPUT);
   pinMode(waterTopLevelPin, INPUT);
   pinMode(waterBottomLevelPin, INPUT);
+  pinMode(TDSSensorPin, INPUT);
   pinMode(waterPumpRelayPin, OUTPUT);
   pinMode(waterFillSelonoidRelayPin, OUTPUT);
   digitalWrite(flowSensorPin, HIGH);
@@ -152,6 +162,18 @@ void loop()
   }
 
   /*
+  *-------------- Water temp read and add to JSON -------------------------
+  * call sensors.requestTemperatures() to issue a global temperature
+  * request to all devices on the bus - DS18b20
+  */
+  if (waterTempPin != 100)
+  {
+    sensors.requestTemperatures(); // Send the command to get temperature readings
+    temperature = sensors.getTempCByIndex(0);
+    json["water"]["temp"] = temperature;
+  }
+
+  /*
   *-------------- PH read and add to JSON -------------------------
   */
   if (PHSensorPin != 100)
@@ -163,14 +185,34 @@ void loop()
   }
 
   /*
-  *-------------- Water temp read and add to JSON -------------------------
-  * call sensors.requestTemperatures() to issue a global temperature
-  * request to all devices on the bus - DS18b20
+  *-------------- TDS read and add to JSON -------------------------
   */
-  if (waterTempPin != 100)
+  if (TDSSensorPin != 100)
   {
-    sensors.requestTemperatures(); // Send the command to get temperature readings
-    json["water"]["temp"] = sensors.getTempCByIndex(0);
+    static unsigned long analogSampleTimepoint = millis();
+    if (millis() - analogSampleTimepoint > 40U) //every 40 milliseconds,read the analog value from the ADC
+    {
+      analogSampleTimepoint = millis();
+      analogBuffer[analogBufferIndex] = analogRead(TDSSensorPin); //read the analog value and store into the buffer
+      analogBufferIndex++;
+      if (analogBufferIndex == SCOUNT)
+        analogBufferIndex = 0;
+    }
+    static unsigned long printTimepoint = millis();
+    if (millis() - printTimepoint > 800U)
+    {
+      printTimepoint = millis();
+      for (copyIndex = 0; copyIndex < SCOUNT; copyIndex++)
+      {
+        analogBufferTemp[copyIndex] = analogBuffer[copyIndex];
+      }
+      averageVoltage = getMedianNum(analogBufferTemp, SCOUNT) * (float)VREF / 1024.0;                                                                                                  // read the analog value more stable by the median filtering algorithm, and convert to voltage value
+      float compensationCoefficient = 1.0 + 0.02 * (temperature - 25.0);                                                                                                               //temperature compensation formula: fFinalResult(25^C) = fFinalResult(current)/(1.0+0.02*(fTP-25.0));
+      float compensationVolatge = averageVoltage / compensationCoefficient;                                                                                                            //temperature compensation
+      tdsValue = (133.42 * compensationVolatge * compensationVolatge * compensationVolatge - 255.86 * compensationVolatge * compensationVolatge + 857.39 * compensationVolatge) * 0.5; //convert voltage value to tds value
+    }
+    // print out the value you read:
+    json["tds"]["tdsvalue"] = tdsValue;
   }
 
   /*
@@ -275,4 +317,29 @@ void stopPump()
 void stopFill()
 {
   digitalWrite(waterFillSelonoidRelayPin, LOW);
+}
+
+int getMedianNum(int bArray[], int iFilterLen)
+{
+  int bTab[iFilterLen];
+  for (byte i = 0; i < iFilterLen; i++)
+    bTab[i] = bArray[i];
+  int i, j, bTemp;
+  for (j = 0; j < iFilterLen - 1; j++)
+  {
+    for (i = 0; i < iFilterLen - j - 1; i++)
+    {
+      if (bTab[i] > bTab[i + 1])
+      {
+        bTemp = bTab[i];
+        bTab[i] = bTab[i + 1];
+        bTab[i + 1] = bTemp;
+      }
+    }
+  }
+  if ((iFilterLen & 1) > 0)
+    bTemp = bTab[(iFilterLen - 1) / 2];
+  else
+    bTemp = (bTab[iFilterLen / 2] + bTab[iFilterLen / 2 - 1]) / 2;
+  return bTemp;
 }
