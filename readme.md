@@ -1,7 +1,12 @@
 # Arduino code for hydrophonics system
 
 ## optional inputs from web interface (Raspberry pi - json format)
-//TODO add input json format
+# TODO 
+- [ ] add json input for variables and pins
+- [ ] add tds sensor input
+- [ ] add nutrient pump logic
+- [ ] add ph- pump logic
+- [ ] add ph+ pump logic
 
 ### analog pin assignments
 * PHSensorPin: char - analog pin assignment for PH sensor (defaults to A0)
