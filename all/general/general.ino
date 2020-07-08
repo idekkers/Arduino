@@ -34,29 +34,29 @@ char LightSensorPin = A1;
 /*
  *--------- Water pump relay pin setup -----------
  */
-int waterPumpRelayPin = 9;
-int waterPumpDefaultState = 0;
+byte waterPumpRelayPin = 9;
+bool waterPumpDefaultState = false;
 unsigned long pumpOldTime;
 
 /*
  *--------- Water top level pin setup -----------
  */
-int waterTopLevelPin = 0;
-int topLevelState = 1; //top level sensor off
+byte waterTopLevelPin = 0;
+bool topLevelState = true; //top level sensor off
 
 /*
  *--------- Water bottom level pin setup -----------
  */
-int waterBottomLevelPin = 1;
-int bottomLevelState = 1;
-int noDelayRefill = 0;
-int stopPumpOnLowLevel = 1;
+byte waterBottomLevelPin = 1;
+bool bottomLevelState = true;
+bool noDelayRefill = false;
+bool stopPumpOnLowLevel = true;
 
 /*
  *--------- Water fill selonoid pin setup -----------
  */
-int waterFillSelonoidRelayPin = 8;
-int fillSelonoidState = 0;
+byte waterFillSelonoidRelayPin = 8;
+bool fillSelonoidState = false;
 unsigned long fillOldTime;
 
 /*
@@ -80,7 +80,7 @@ unsigned long flowOldTime;
 /*
  *--------- Water temp pin setup -----------
  */
-int waterTempPin = 6;
+byte waterTempPin = 6;
 // Setup a oneWire instance to communicate with any OneWire devices
 OneWire oneWire(waterTempPin);
 // Pass our oneWire reference to Dallas Temperature.
@@ -100,7 +100,7 @@ void setup()
   pinMode(waterTopLevelPin, INPUT);
   pinMode(waterBottomLevelPin, INPUT);
   pinMode(waterPumpRelayPin, OUTPUT);
-  pinMode(waterFillSelonoidPin, OUTPUT);
+  pinMode(waterFillSelonoidRelayPin, OUTPUT);
   digitalWrite(flowSensorPin, HIGH);
 
   pulseCount = 0;
@@ -114,11 +114,11 @@ void setup()
   // state to LOW state)
   attachInterrupt(digitalPinToInterrupt(flowSensorPin), pulseCounter, FALLING);
 
+  // top level water sensor triggers when closed
   attachInterrupt(digitalPinToInterrupt(waterTopLevelPin), stopFill, RISING);
 
+  // bottom level water sensor triggers when open
   attachInterrupt(digitalPinToInterrupt(waterBottomLevelPin), stopPump, FALLING);
-
-  attachInterrupt(digitalPinToInterrupt(flowSensorPin), pulseCounter, FALLING);
 
   // BME280 temp humidity and pressure
   if (!bme.begin(0x76))
@@ -157,7 +157,7 @@ void loop()
   if (PHSensorPin != 100)
   {
     // read the input on analog pin 0:
-    int sensorValue = analogRead(PHSensorPin);
+    unsigned int sensorValue = analogRead(PHSensorPin);
     // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
     float voltage = sensorValue * (5.0 / 1023.0);
     // print out the value you read:
@@ -181,8 +181,7 @@ void loop()
   if (LightSensorPin != 100)
   {
     //LM393 start analog light read
-    unsigned int LightAnalogValue;
-    LightAnalogValue = analogRead(LightSensorPin);
+    unsigned int LightAnalogValue = analogRead(LightSensorPin);
     json["environment"]["light"] = LightAnalogValue;
   }
 
@@ -252,26 +251,30 @@ void pulseCounter()
 }
 
 /*
-* Insterrupt Service Routine - stop water pump when water level low
+* Insterrupt Service Routine - 
+* stop water pump when water level low if stopPumpOnLowLevel == true
+* start filling reservoir immediatly if noDelayRefill == true
  */
 void stopPump()
 {
-  Serial.println("stop pump");
-  if (stopPumpOnLowLevel == 1)
+  // if stopPumpOnLowLevel is set to true,
+  // stop the water pump when low level is triggered
+  if (stopPumpOnLowLevel)
   {
     digitalWrite(waterPumpRelayPin, LOW);
   }
-  if (noDelayRefill == 1)
+  // if noDelayRefill is set to true, start water reservoir fill immediatly
+  if (noDelayRefill)
   {
-    digitalWrite(waterFillSelonoidPin, HIGH);
+    digitalWrite(waterFillSelonoidRelayPin, HIGH);
   }
 }
 
 /*
-* Insterrupt Service Routine - stop water fill through selonoid when reservoir is full
+* Insterrupt Service Routine - 
+* stop water fill through selonoid when reservoir is full
  */
 void stopFill()
 {
-  Serial.println("stop fill");
-  digitalWrite(waterFillSelonoidPin, LOW);
+  digitalWrite(waterFillSelonoidRelayPin, LOW);
 }
