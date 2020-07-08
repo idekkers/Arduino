@@ -24,7 +24,7 @@
 * stopPumpOnLowLevel : stop water pump on low water level (defaults to true) 
 
 ## json output from arduino
-
+```
 {
     "water":{
         "topLevelState": int,
@@ -42,3 +42,4 @@
         "humidity": float
     }
 }
+```
