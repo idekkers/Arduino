@@ -12,6 +12,7 @@ The system measures air and water data (all sensors optional)-
 ## optional inputs from web interface (Raspberry pi - json format)
 # TODO 
 - [ ] add json input for variables and pins
+- [ ] add logic to open water selonoid after 15 min from low level triger
 - [x] add tds sensor input
 
 ### analog pin assignments

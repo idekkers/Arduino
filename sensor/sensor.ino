@@ -1,5 +1,6 @@
 #include <Wire.h>
 #include <OneWire.h>
+#include "RTClib.h"
 #include <DallasTemperature.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
@@ -27,8 +28,8 @@ char PHSensorPin = A0;
  *--------- TDS pin setup --------------------
  */
 char TDSSensorPin = A2;
-#define VREF 5.0                   // analog reference voltage(Volt) of the ADC
-#define SCOUNT 30                  // sum of sample point
+#define VREF 5.0          // analog reference voltage(Volt) of the ADC
+#define SCOUNT 30         // sum of sample point
 int analogBuffer[SCOUNT]; // store the analog value in the array, read from ADC
 int analogBufferTemp[SCOUNT];
 int analogBufferIndex = 0, copyIndex = 0;
@@ -93,7 +94,13 @@ unsigned long pumpOldTime;
  */
 byte waterFillSelonoidRelayPin = 8;
 bool fillSelonoidState = false;
-unsigned long fillOldTime;
+unsigned long fillDelay = 900; // in seconds
+unsigned long fillDelayStartTime = 0;
+
+/*
+ *--------- RTC clock setup -----------
+ */
+RTC_DS1307 rtc;
 
 /********************************************************************/
 
@@ -137,6 +144,21 @@ void setup()
     while (1)
       ;
   }
+  //RTC clock setup
+  // if (!rtc.begin())
+  // {
+  //   Serial.println("Couldn't find RTC");
+  //   while (1);
+  // }
+  if (!rtc.isrunning())
+  {
+    Serial.println("RTC is NOT running!");
+    // following line sets the RTC to the date & time this sketch was compiled
+    // rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
+    // This line sets the RTC with an explicit date & time, for example to set
+    // January 21, 2014 at 3am you would call:
+    // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
+  }
 }
 
 void loop()
@@ -147,6 +169,21 @@ void loop()
     String data = Serial.readStringUntil('\n');
     update_interval = data.toInt();
     json["recieved"] = data;
+  }
+
+  /*
+  * --------------- water level fiil check --------------------
+  * check if noDelayRefill set to false and fillDelayStartTime not 0 
+  * then check if current tiem is less then fill delay plus fill delay start time, 
+  * if so, open the fill selonoid
+  */
+  if (!noDelayRefill && fillDelayStartTime != 0)
+  {
+    if (rtc.now().unixtime() < fillDelayStartTime + fillDelay)
+    {
+      fillDelayStartTime = 0;
+      digitalWrite(waterFillSelonoidRelayPin, HIGH);
+    }
   }
 
   /*
@@ -307,6 +344,10 @@ void stopPump()
   if (noDelayRefill)
   {
     digitalWrite(waterFillSelonoidRelayPin, HIGH);
+  }
+  else
+  {
+    fillDelayStartTime = rtc.now().unixtime();
   }
 }
 
