@@ -1,5 +1,8 @@
 # BOM for hydrophonics system
 
+## Raspberry pi
+https://www.raspberrypi.org/products/raspberry-pi-4-model-b/
+
 ## Arduino
 https://store.arduino.cc/usa/nano-every-with-headers
 
