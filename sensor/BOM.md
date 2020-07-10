@@ -17,3 +17,4 @@ https://store.arduino.cc/usa/nano-every-with-headers
 - Relay : [relay - select number by need](https://www.ebay.com/itm/1-2-4-8-16-Channel-Relay-Module-5V-Optocoupler-LED-for-Arduino-PiC-ARM-AVR/401633680360?hash=item5d833b9be8:g:xR4AAOSwSlpb69sH)
 - 12V power supply : [5A should be enough usualy](https://www.ebay.com/itm/5V-12V24V-Lighting-Transformer-5A-10A-Switching-Power-Supply-60W-120W-150W-360W/254262560641?hash=item3b333ac781:g:VxEAAOSwX4FdAgqN)
 - 12V water pump : whatever head and lph suites you
+- 12V dosing pump : [paristaltic pump - as many as you need](https://www.ebay.com/itm/Mini-12V-DC-Pump-Peristaltic-Dosing-Head-for-Chemical-Aquarium-Analytic-New/114284977943?hash=item1a9bea5f17:g:m-kAAOSwzMFe~GEv)
