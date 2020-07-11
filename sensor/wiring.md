@@ -31,7 +31,7 @@ The Ph sensor connects to a small controller board that has 3 wires
 - data wire (usualy blue but can be other color) - connects to any of the analog pins on the arduino, (A0 if no code change is wanted)
 
 ### TDS/EC sensor
-![tds sensor](../images/tds.jpg)  
+![tds sensor](../images/tds.png)  
 The TDS sensor also uses a small controller board with 3 wires
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd (black wire) - connects to the common ground bus
