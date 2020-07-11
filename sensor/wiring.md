@@ -56,8 +56,9 @@ The water flow sensor has 3 wires
 ### Water level sensor
 The water level sensor has 3 wires
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
-- Gnd (black wire) - connects to the common ground bus
-- data wire - connect to any digital input pin **with interupt** on the arduino
+- Data (black wire) - connects to any digital pin on the Arduino, with a pullup resistor
+![pullup resistor](../images/pullup.jpg)  
+the resistor bridges from the data wire to gnd, use a 10Kohm resistor
 
 ## I2C sensors and RTC
 The I2C bus is a shared bus, you can either connect all the wires to a common bus - preferably (one for SDA and one for SCL), or daisy chain them.
