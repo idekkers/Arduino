@@ -59,7 +59,7 @@ The water level sensor has 3 wires
 ## I2C sensors and RTC
 The I2C bus is a shared bus, you can either connect all the wires to a common bus - preferably (one for SDA and one for SCL), or daisy chane them.
 ### RTC
-![RTC](../images/rtc.jpg)
+![RTC](../images/RTC.jpg)
 The RTC (I use) has 7 pins on one side and 5 mirrored on the other
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd (black wire) - connects to the common ground bus
