@@ -12,8 +12,12 @@ The system measures air and water data (all sensors optional)-
 ## optional inputs from web interface (Raspberry pi - json format)
 # TODO 
 - [ ] add json input for variables and pins
-- [ ] add logic to open water selonoid after 15 min from low level triger
+- [X] add logic to open water selonoid after 15 min from low level triger
 - [x] add tds sensor input
+- [ ] add logic for nutrients pump activation
+- [ ] add logic for ph+ pump activation
+- [ ] add logic for ph- pump activation
+- [ ] ph calibration code
 
 ### analog pin assignments
 * PHSensorPin: char - analog pin assignment for PH sensor (defaults to A0)

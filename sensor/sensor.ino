@@ -98,6 +98,33 @@ unsigned long fillDelay = 900; // in seconds
 unsigned long fillDelayStartTime = 0;
 
 /*
+ *--------- nutrients pump 1 pin setup -----------
+ */
+byte nutrientPump1RelayPin = 10;
+unsigned long nutrientPump1Duration = 5;//in seconds
+unsigned int minimumNutrientLevel = 450;
+unsigned int requiredNutrientLevel = 700;
+unsigned long nutrientfillDelay = 900; // in seconds
+unsigned long nutrientTestDelayStartTime = 0;
+
+/*
+ *--------- ph- pump pin setup -----------
+ */
+byte phMinusPumpRelayPin = 11;
+unsigned long phMinusPumpDuration = 5;//in seconds
+unsigned float minimumPhLevel = 5.5;
+unsigned float maximumPhLevel = 6.5;
+unsigned long phfillDelay = 900; // in seconds
+unsigned long phTestDelayStartTime = 0;
+
+/*
+ *--------- ph+ pump pin setup -----------
+ */
+byte phPlusPumpRelayPin = 12;
+unsigned long phPlusPumpDuration = 5;//in seconds
+
+
+/*
  *--------- RTC clock setup -----------
  */
 RTC_DS1307 rtc;

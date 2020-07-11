@@ -14,11 +14,11 @@ A5/23 -
 5 - 
 6 - water temp
 7/int - water flow
-8 - 
-9 - 
-10 - 
-11 - 
-12 - 
+8 - water fill relay
+9 - water pump
+10 - nutrients pump 1
+11 - ph- pump
+12 - p+ pump
 13 - 
 14 - 
 15 - 
