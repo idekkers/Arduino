@@ -25,7 +25,7 @@ all the sensors get thier power from the arduino 5V pin, so you can create a com
 ## Analog sensors
 ### ph
 ![ph sensor](../images/ph.jpg)  
-The Ph sensor connects to a small controller board that has 3 wires
+The Ph sensor connects to a small controller board that has 3 wires  
 There are versions with more then 3 pins, if you get that one, use the Po pin for the data pin
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd/G (black wire) - connects to the common ground bus
