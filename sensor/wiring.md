@@ -24,19 +24,21 @@ all the sensors get thier power from the arduino 5V pin, so you can create a com
 
 ## Analog sensors
 ### ph
+![ph sensor](../images/ph.jpg)  
 The Ph sensor connects to a small controller board that has 3 wires
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd (black wire) - connects to the common ground bus
 - data wire (usualy blue but can be other color) - connects to any of the analog pins on the arduino, (A0 if no code change is wanted)
 
 ### TDS/EC sensor
+![tds sensor](../images/tds.jpg)  
 The TDS sensor also uses a small controller board with 3 wires
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd (black wire) - connects to the common ground bus
 - data wire (usualy yellow but can be other color) - connects to any of the analog pins on the arduino, (A2 if no code change is wanted)
 
 ### Light sensor
-![light sensor](../images/light.jpg)
+![light sensor](../images/light.jpg)  
 The light sensor has 4 pins
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd (black wire) - connects to the common ground bus
@@ -57,22 +59,22 @@ The water level sensor has 3 wires
 - data wire - connect to any digital input pin **with interupt** on the arduino
 
 ## I2C sensors and RTC
-The I2C bus is a shared bus, you can either connect all the wires to a common bus - preferably (one for SDA and one for SCL), or daisy chane them.
+The I2C bus is a shared bus, you can either connect all the wires to a common bus - preferably (one for SDA and one for SCL), or daisy chain them.
 ### RTC
-![RTC](../images/rtc.jpeg)
+![RTC](../images/rtc.jpeg)  
 The RTC (I use) has 7 pins on one side and 5 mirrored on the other
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd (black wire) - connects to the common ground bus
 - SDA - this is half of the I2C bus, connects to the SDA pin on the arduino
 - SCL - this is the second half of the I2C bus, connects to the SCL pin on the arduino
 - SQ - not used
-- DS - if you have the tempratuse sensor on the RTC board (only some have it), you can connect it to any digital pin on the Arduino
+- DS - if you have the tempratuse sensor on the RTC board (only some have it - the area circled in red should not be empty), you can connect it to any digital pin on the Arduino
 - BAT - not used
 except for the SQ and the BAT pins, all pins are mirrored on both sides, you can use either,
 you can also connect other sensors to the not used side of the RTC insted of directly to the Arduino (though I could find no use for that)
 
 ### Environmental sensor
-![bme280](../images/bme280.jpg)
+![bme280](../images/bme280.jpg)  
 The environmental sensor also connects to the I2C bus and has 4 pins
 - VIn/V+/Vcc (red wire) - which connects to the common arduino 5V bus 
 - Gnd (black wire) - connects to the common ground bus
