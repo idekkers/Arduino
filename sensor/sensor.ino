@@ -55,11 +55,6 @@ bool noDelayRefill = false;
 bool stopPumpOnLowLevel = true;
 
 /*
- *--------- BME280 setup --------------------
- */
-Adafruit_BME280 bme;
-
-/*
  *--------- flow sensor pin setup -----------
  */
 byte flowSensorPin = 7;
@@ -87,7 +82,9 @@ DallasTemperature sensors(&oneWire);
  */
 byte waterPumpRelayPin = 9;
 bool waterPumpDefaultState = false;
-unsigned long pumpOldTime;
+bool waterPumpConstantFlow = false;
+unsigned long pumpStartTime;
+unsigned long pumpStopTime;
 
 /*
  *--------- Water fill selonoid pin setup -----------
@@ -101,19 +98,20 @@ unsigned long fillDelayStartTime = 0;
  *--------- nutrients pump 1 pin setup -----------
  */
 byte nutrientPump1RelayPin = 10;
-unsigned long nutrientPump1Duration = 5;//in seconds
+unsigned long nutrientPump1Duration = 5; //in seconds
 unsigned int minimumNutrientLevel = 450;
 unsigned int requiredNutrientLevel = 700;
-unsigned long nutrientfillDelay = 900; // in seconds
-unsigned long nutrientTestDelayStartTime = 0;
+unsigned long nutrientfillDelay = 900;     // in seconds
+unsigned long tempNutrientfillDelay = 900; // in seconds
+byte nutrientLevelingTry = 0;
 
 /*
  *--------- ph- pump pin setup -----------
  */
 byte phMinusPumpRelayPin = 11;
-unsigned long phMinusPumpDuration = 5;//in seconds
-unsigned float minimumPhLevel = 5.5;
-unsigned float maximumPhLevel = 6.5;
+unsigned long phMinusPumpDuration = 5; //in seconds
+float minimumPhLevel = 5.5;
+float maximumPhLevel = 6.5;
 unsigned long phfillDelay = 900; // in seconds
 unsigned long phTestDelayStartTime = 0;
 
@@ -121,8 +119,14 @@ unsigned long phTestDelayStartTime = 0;
  *--------- ph+ pump pin setup -----------
  */
 byte phPlusPumpRelayPin = 12;
-unsigned long phPlusPumpDuration = 5;//in seconds
+unsigned long phPlusPumpDuration = 5; //in seconds
 
+/* --------------------------- I2C setup -------------------------------*/
+
+/*
+ *--------- BME280 setup --------------------
+ */
+Adafruit_BME280 bme;
 
 /*
  *--------- RTC clock setup -----------
@@ -171,6 +175,7 @@ void setup()
     while (1)
       ;
   }
+
   //RTC clock setup
   // if (!rtc.begin())
   // {
@@ -186,6 +191,15 @@ void setup()
     // January 21, 2014 at 3am you would call:
     // rtc.adjust(DateTime(2014, 1, 21, 3, 0, 0));
   }
+
+  /*
+ *--------- if pump should work all the time 
+ * or time is greater then pump start time and smaller then stop time -----------
+ */
+  if (waterPumpConstantFlow || (pumpStartTime > rtc.now().hour() && pumpStopTime < rtc.now().hour()))
+  {
+    digitalWrite(waterPumpRelayPin, HIGH);
+  }
 }
 
 void loop()
@@ -196,6 +210,18 @@ void loop()
     String data = Serial.readStringUntil('\n');
     update_interval = data.toInt();
     json["recieved"] = data;
+  }
+
+  /*
+ *--------- reduce delays by interval time --------------------
+ */
+  if (tempNutrientfillDelay > update_interval / 1000)
+  {
+    tempNutrientfillDelay = tempNutrientfillDelay - update_interval / 1000;
+  }
+  else
+  {
+    tempNutrientfillDelay = 0;
   }
 
   /*
@@ -223,6 +249,66 @@ void loop()
   if (!bottomLevelState)
   {
     digitalWrite(waterPumpRelayPin, 0);
+  }
+
+  /*
+  * ------------ read flow rate and add to JSON -----------
+  */
+  if (flowSensorPin != 100)
+  {
+    if ((millis() - flowOldTime) > update_interval) // Only process counters once per second
+    {
+      // Disable the interrupt while calculating flow rate and sending the value to
+      // the host
+      detachInterrupt(digitalPinToInterrupt(flowSensorPin));
+
+      // Because this loop may not complete in exactly 1 second intervals we calculate
+      // the number of milliseconds that have passed since the last execution and use
+      // that to scale the output. We also apply the calibrationFactor to scale the output
+      // based on the number of pulses per second per units of measure (litres/minute in
+      // this case) coming from the sensor.
+      flowRate = ((update_interval / (millis() - flowOldTime)) * pulseCount) / calibrationFactor;
+
+      // Note the time this processing pass was executed. Note that because we've
+      // disabled interrupts the millis() function won't actually be incrementing right
+      // at this point, but it will still return the value it was set to just before
+      // interrupts went away.
+      flowOldTime = millis();
+
+      // Divide the flow rate in litres/minute by 60 to determine how many litres have
+      // passed through the sensor in this 1 second interval, then multiply by 1000 to
+      // convert to millilitres.
+      flowMilliLitres = (flowRate / 60) * 1000;
+
+      // Add the millilitres passed in this second to the cumulative total
+      totalMilliLitres += flowMilliLitres;
+
+      unsigned int frac;
+
+      // Print the flow rate for this second in litres / minute
+      json["water"]["flowRate"] = int(flowRate);
+
+      // Reset the pulse counter so we can start incrementing again
+      pulseCount = 0;
+
+      // Enable the interrupt again now that we've finished sending output
+      attachInterrupt(digitalPinToInterrupt(flowSensorPin), pulseCounter, FALLING);
+    }
+  }
+
+  /*
+  *-------------- start and stop water pump -------------------------
+  */
+  if (!waterPumpConstantFlow)
+  {
+    if (pumpStartTime > rtc.now().hour() && pumpStopTime < rtc.now().hour())
+    {
+      digitalWrite(waterPumpRelayPin, HIGH);
+    }
+    else
+    {
+      digitalWrite(waterPumpRelayPin, LOW);
+    }
   }
 
   /*
@@ -295,51 +381,6 @@ void loop()
   json["environment"]["temp"] = bme.readTemperature();
   json["environment"]["pressure"] = bme.readPressure() / 100.0F;
   json["environment"]["humidity"] = bme.readHumidity();
-
-  /*
-  * ------------flow rate read and add to JSON -----------
-  */
-  if (flowSensorPin != 100)
-  {
-    if ((millis() - flowOldTime) > update_interval) // Only process counters once per second
-    {
-      // Disable the interrupt while calculating flow rate and sending the value to
-      // the host
-      detachInterrupt(digitalPinToInterrupt(flowSensorPin));
-
-      // Because this loop may not complete in exactly 1 second intervals we calculate
-      // the number of milliseconds that have passed since the last execution and use
-      // that to scale the output. We also apply the calibrationFactor to scale the output
-      // based on the number of pulses per second per units of measure (litres/minute in
-      // this case) coming from the sensor.
-      flowRate = ((update_interval / (millis() - flowOldTime)) * pulseCount) / calibrationFactor;
-
-      // Note the time this processing pass was executed. Note that because we've
-      // disabled interrupts the millis() function won't actually be incrementing right
-      // at this point, but it will still return the value it was set to just before
-      // interrupts went away.
-      flowOldTime = millis();
-
-      // Divide the flow rate in litres/minute by 60 to determine how many litres have
-      // passed through the sensor in this 1 second interval, then multiply by 1000 to
-      // convert to millilitres.
-      flowMilliLitres = (flowRate / 60) * 1000;
-
-      // Add the millilitres passed in this second to the cumulative total
-      totalMilliLitres += flowMilliLitres;
-
-      unsigned int frac;
-
-      // Print the flow rate for this second in litres / minute
-      json["water"]["flowRate"] = int(flowRate);
-
-      // Reset the pulse counter so we can start incrementing again
-      pulseCount = 0;
-
-      // Enable the interrupt again now that we've finished sending output
-      attachInterrupt(digitalPinToInterrupt(flowSensorPin), pulseCounter, FALLING);
-    }
-  }
 
   Serial.println(serializeJson(json, Serial));
   delay(update_interval);
