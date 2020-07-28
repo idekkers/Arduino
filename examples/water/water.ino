@@ -4,14 +4,14 @@
 #include <Adafruit_Sensor.h>
 #include <ArduinoJson.h>
 
-int update_interval = 15000;
+int update_interval = 5000;
 // ---------flow sensor pin setup-----------//
 byte sensorInterrupt = 0; // 0 = digital pin 2
 byte sensorPin = 2;
 
 /********************************************************************/
 // Data wire is plugged into pin 5 on the Arduino
-int ONE_WIRE_PIN =  5;
+int ONE_WIRE_PIN =  6;
 
 // The hall-effect flow sensor outputs approximately 4.5 pulses per second per
 // litre/minute of flow.
