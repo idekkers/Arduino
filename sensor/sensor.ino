@@ -43,7 +43,7 @@ float averageVoltage = 0, tdsValue = 0, temperature = 25;
  *--------- Light sensor pin setup ----------
  */
 char LightSensorPin = A1;
-int lightSwitchLuminosity = 1000;
+int lightOnLuminosity = 1000;
 
 /*
  *--------- Water top level pin setup -----------
@@ -96,7 +96,7 @@ unsigned long WaterPumpStopTime;
  */
 byte waterFillSelonoidRelayPin = 8;
 bool fillSelonoidState = false;
-unsigned long waterFillDelay = 900; // in seconds
+unsigned long waterFillDelay = 1200; // in seconds
 unsigned long fillDelayStartTime = 0;
 
 /*
