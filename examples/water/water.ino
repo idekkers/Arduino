@@ -6,12 +6,11 @@
 
 int update_interval = 5000;
 // ---------flow sensor pin setup-----------//
-byte sensorInterrupt = 0; // 0 = digital pin 2
-byte sensorPin = 2;
+byte flowSensorPin = 2;
 
 /********************************************************************/
 // Data wire is plugged into pin 5 on the Arduino
-int ONE_WIRE_PIN =  6;
+int ONE_WIRE_PIN =  3;
 
 // The hall-effect flow sensor outputs approximately 4.5 pulses per second per
 // litre/minute of flow.
@@ -41,8 +40,8 @@ void setup()
   // Start up the sensor library for water temp DS18b20
   sensors.begin();
 
-  pinMode(sensorPin, INPUT);
-  digitalWrite(sensorPin, HIGH);
+  pinMode(flowSensorPin, INPUT);
+  digitalWrite(flowSensorPin, HIGH);
 
   pulseCount = 0;
   flowRate = 0.0;
@@ -53,7 +52,7 @@ void setup()
   // The Hall-effect sensor is connected to pin 2 which uses interrupt 0.
   // Configured to trigger on a FALLING state change (transition from HIGH
   // state to LOW state)
-  attachInterrupt(sensorInterrupt, pulseCounter, FALLING);
+  attachInterrupt(digitalPinToInterrupt(flowSensorPin), pulseCounter, FALLING);
 }
 
 void loop()
@@ -72,7 +71,7 @@ void loop()
   {
     // Disable the interrupt while calculating flow rate and sending the value to
     // the host
-    detachInterrupt(sensorInterrupt);
+    detachInterrupt(digitalPinToInterrupt(flowSensorPin));
 
     // Because this loop may not complete in exactly 1 second intervals we calculate
     // the number of milliseconds that have passed since the last execution and use
@@ -104,7 +103,7 @@ void loop()
     pulseCount = 0;
 
     // Enable the interrupt again now that we've finished sending output
-    attachInterrupt(sensorInterrupt, pulseCounter, FALLING);
+    attachInterrupt(digitalPinToInterrupt(flowSensorPin), pulseCounter, FALLING);
   }
   Serial.println(serializeJson(json, Serial));
 }
