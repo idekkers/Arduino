@@ -103,31 +103,41 @@ unsigned long fillDelayStartTime = 0;
  *--------- nutrients pump 1 pin setup -----------
  */
 byte nutrientPump1RelayPin = 10;
-unsigned long nutrientPump1FillDuration = 5;     //in seconds
-unsigned long tempNutrientPump1FillDuration = 5; //in seconds
-unsigned int minimumNutrientLevel = 450;
-unsigned int requiredNutrientLevel = 700;
-unsigned long nutrientFillDelay = 900;     // in seconds
-unsigned long tempNutrientfillDelay = 900; // in seconds
-byte nutrientLevelingTry = 0;
+unsigned long nutrientPump1FillDuration = 5 * 1000000;     //in seconds
+unsigned long tempNutrientPump1FillDuration = 5 * 1000000; //in seconds
+
+/*
+ *--------- nutrients constants setup -----------
+ */
+unsigned int minimumNutrientLevel = 450; // low nutrients level to start leveling process
+unsigned int requiredNutrientLevel = 700; // required nutrients level to stop leveling process
+unsigned long nutrientFillDelay = 900;   // in seconds
+unsigned long tempNutrientfillDelay = 0; // in seconds
+bool nutrientLevelingCycle = false;
 
 /*
  *--------- ph- pump pin setup -----------
  */
 byte phMinusPumpRelayPin = 11;
-unsigned long phMinusPumpFillDuration = 5;     //in seconds
-unsigned long tempPhMinusPumpFillDuration = 5; //in seconds
-float minimumPhLevel = 5.5;
-float maximumPhLevel = 6.5;
-unsigned long phFillDelay = 900; // in seconds
-unsigned long phTestDelayStartTime = 0;
+unsigned long phMinusPumpFillDuration = 5 * 1000000;     //in seconds
+unsigned long tempPhMinusPumpFillDuration = 5 * 1000000; //in seconds
 
 /*
  *--------- ph+ pump pin setup -----------
  */
 byte phPlusPumpRelayPin = 12;
-unsigned long phPlusPumpFillDuration = 5;     //in seconds
-unsigned long tempPhPlusPumpFillDuration = 5; //in seconds
+unsigned long phPlusPumpFillDuration = 5 * 1000000;     //in seconds
+unsigned long tempPhPlusPumpFillDuration = 5 * 1000000; //in seconds
+
+/*
+ *--------- ph- constants setup -----------
+ */
+float triggerPhPlusPump = 4.5; // Low Ph level to start Ph leveling
+float triggerPhMinusPump = 6.5; // High Ph level to start Ph leveling
+float optimalPh = 5.5;
+unsigned long phFillDelay = 900;    // delay between Ph leveling atempts in seconds
+unsigned long tempPhtfillDelay = 0; // in seconds
+bool phLevelingCycle = false; // is Ph leveling in progress
 
 /* --------------------------- I2C setup -------------------------------*/
 
@@ -362,6 +372,38 @@ void loop()
         unsigned int sensorValue = analogRead(PHSensorPin);
         // print out the value you read:
         json["ph"]["phvalue"] = sensorValue;
+
+        if (!nutrientLevelingCycle)
+        {
+            // if TDS level lower then minimum, set leveling cycle to true, and turn on the nutrients pump
+            if (sensorValue > triggerPhMinusPump && !phLevelingCycle)
+            {
+                digitalWrite(phMinusPumpRelayPin, HIGH);
+                phLevelingCycle = true;
+            }
+            // if in leveling cycle
+            if (phLevelingCycle)
+            {
+                // if required level reached, and not below low setting, stop Ph leveling cycle, if below, start ph+ pump
+                if (sensorValue <= optimalPh)
+                {
+                    if (sensorValue <= triggerPhPlusPump)
+                    {
+                        digitalWrite(phPlusPumpRelayPin, HIGH);
+                    }
+                    else
+                    {
+                        phLevelingCycle = false;
+                    }
+                }
+                //if required level not reached, open nutrients pump and reset fill delay
+                else if (tempPhtfillDelay <= 0)
+                {
+                    digitalWrite(phMinusPumpRelayPin, HIGH);
+                    tempPhtfillDelay = phFillDelay;
+                }
+            }
+        }
     }
 
     /*
@@ -393,6 +435,28 @@ void loop()
         }
         // print out the value you read:
         json["tds"]["tdsvalue"] = tdsValue;
+
+        // if TDS level lower then minimum, set leveling cycle to true, and turn on the nutrients pump
+        if (tdsValue < minimumNutrientLevel && !nutrientLevelingCycle)
+        {
+            digitalWrite(nutrientPump1RelayPin, HIGH);
+            nutrientLevelingCycle = true;
+        }
+        // if in leveling cycle
+        if (nutrientLevelingCycle)
+        {
+            // if required level reached, stop nutrients leveling cycle
+            if (tdsValue >= requiredNutrientLevel)
+            {
+                nutrientLevelingCycle = false;
+            }
+            //if required level not reached, open nutrients pump and reset fill delay
+            else if (tempNutrientfillDelay <= 0)
+            {
+                digitalWrite(nutrientPump1RelayPin, HIGH);
+                tempNutrientfillDelay = nutrientFillDelay;
+            }
+        }
     }
 
     /*

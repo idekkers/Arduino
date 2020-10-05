@@ -12,11 +12,11 @@ The system measures air and water data (all sensors optional)-
 ## optional inputs from web interface (Raspberry pi - json format)
 # TODO 
 - [ ] add json input for variables and pins
-- [X] add logic to open water selonoid after 15 min from low level triger
+- [x] add logic to open water selonoid after 15 min from low level triger
 - [x] add tds sensor input
-- [ ] add logic for nutrients pump activation
-- [ ] add logic for ph+ pump activation
-- [ ] add logic for ph- pump activation
+- [x] add logic for nutrients pump activation
+- [x] add logic for ph+ pump activation
+- [x] add logic for ph- pump activation
 - [ ] ph calibration code
 
 ### analog pin assignments
@@ -46,8 +46,9 @@ The system measures air and water data (all sensors optional)-
 * phMinusPumpFillDuration: duration of PH- pump on state (defaults to 5)
 * nutrientPump1FillDuration: duration of nutrients pump on state (defaults to 5)
 * phFillDelay: delay from last Ph change to let the acid/base mix properly (defaults to 900)
-* maximumPhLevel: start adding acid on this level (defaults to 6.5)
-* minimumPhLevel: start adding base on this level (defaults to 5.5)
+* triggerPhMinusPump: start adding acid on this level (defaults to 6.5)
+* triggerPhPlusPump: start adding base on this level (defaults to 4.5)
+* optimalPh: optimal Ph level (defaults to 5.5)
 * nutrientFillDelay: delay from last nutrients change to let the nutrients mix properly (defaults to 900)
 * requiredNutrientLevel: stop nutrients fill on this level (defaults to 700)
 * minimumNutrientLevel: start nutrients fill on this level (defaults to 450)
