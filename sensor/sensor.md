@@ -8,6 +8,7 @@ The system measures air and water data (all sensors optional)-
 - air humidity
 - barometric preasure
 - light intensity
+- CO2 and VOC levels
 
 ## optional inputs from web interface (Raspberry pi - json format)
 # TODO 
@@ -38,22 +39,26 @@ The system measures air and water data (all sensors optional)-
 * phPlusPumpRelayPin: digital output pin for PH+ pump relay (defaults to 12)
 
 ### setup parameters
-* waterPumpDefaultState: default water pump state (defaults to false)
-* noDelayRefill: start tank fill on low level with no delay (defaults to false)
-* stopPumpOnLowLevel: stop water pump on low water level (defaults to true)
-* lightOnLuminosity: luminosity level to switch lights on/off (defaults to 1000)
-* phPlusPumpFillDuration: duration of PH+ pump on state (defaults to 5)
-* phMinusPumpFillDuration: duration of PH- pump on state (defaults to 5)
-* nutrientPump1FillDuration: duration of nutrients pump on state (defaults to 5)
-* phFillDelay: delay from last Ph change to let the acid/base mix properly (defaults to 900)
-* triggerPhMinusPump: start adding acid on this level (defaults to 6.5)
-* triggerPhPlusPump: start adding base on this level (defaults to 4.5)
-* optimalPh: optimal Ph level (defaults to 5.5)
-* nutrientFillDelay: delay from last nutrients change to let the nutrients mix properly (defaults to 900)
-* requiredNutrientLevel: stop nutrients fill on this level (defaults to 700)
-* minimumNutrientLevel: start nutrients fill on this level (defaults to 450)
-* waterFillDelay: delay from waterBottomLevelPin set LOW until water fill starts if noDelayRefill set to false (defaults to 1200)
-* waterPumpConstantFlow: set if water pump works constantly (defaults to false)
+* water
+    * waterPumpDefaultState: default water pump state (defaults to false)
+    * waterFillDelay: delay from waterBottomLevelPin set LOW until water fill starts if noDelayRefill set to false (defaults to 1200)
+    * waterPumpConstantFlow: set if water pump works constantly (defaults to false)
+    * noDelayRefill: start tank fill on low level with no delay (defaults to false)
+    * stopPumpOnLowLevel: stop water pump on low water level (defaults to true)
+* light
+    * lightOnLuminosity: luminosity level to switch lights on/off (defaults to 1000)
+* Ph
+    * phPlusPumpFillDuration: duration of PH+ pump on state (defaults to 5)
+    * phMinusPumpFillDuration: duration of PH- pump on state (defaults to 5)
+    * phFillDelay: delay from last Ph change to let the acid/base mix properly (defaults to 900)
+    * triggerPhMinusPump: start adding acid on this level (defaults to 6.5)
+    * triggerPhPlusPump: start adding base on this level (defaults to 4.5)
+    * optimalPh: optimal Ph level (defaults to 5.5)
+* nutrients
+    * nutrientPump1FillDuration: duration of nutrients pump on state (defaults to 5)
+    * nutrientFillDelay: delay from last nutrients change to let the nutrients mix properly (defaults to 900)
+    * requiredNutrientLevel: stop nutrients fill on this level (defaults to 700)
+    * minimumNutrientLevel: start nutrients fill on this level (defaults to 450)
 
 ## json output from arduino
 ```
