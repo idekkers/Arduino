@@ -243,9 +243,9 @@ void setup()
   }
 
   // set software interrupt to check when to shut off nutrients and ph pumps
-  Timer1.initialize();
-  Timer1.attachInterrupt(checkPumpStop);
-  Timer1.setPeriod(interruptTimer);
+  //Timer1.initialize();
+  //Timer1.attachInterrupt(checkPumpStop);
+  //Timer1.setPeriod(interruptTimer);
 }
 
 void loop()
