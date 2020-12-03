@@ -12,12 +12,7 @@ The system measures air and water data (all sensors optional)-
 
 ## optional inputs from web interface (Raspberry pi - json format)
 # TODO 
-- [ ] add json input for variables and pins
-- [x] add logic to open water selonoid after 15 min from low level triger
-- [x] add tds sensor input
-- [x] add logic for nutrients pump activation
-- [x] add logic for ph+ pump activation
-- [x] add logic for ph- pump activation
+- [x] add json input for variables and pins
 - [ ] ph calibration code
 
 ### analog pin assignments
@@ -80,6 +75,43 @@ The system measures air and water data (all sensors optional)-
         "temp": float,
         "pressure": float,
         "humidity": float
+    }
+}
+```
+
+## json input to arduino
+```
+{
+    "pins":{
+        "PHSensorPin": string,
+        "TDSSensorPin": string,
+        "LightSensorPin": string,
+        "waterTopLevelPin": int,
+        "waterBottomLevelPin": int, 
+        "flowSensorPin": int, 
+        "waterTempPin": int, 
+        "waterFillSelonoidRelayPin": int, 
+        "waterPumpRelayPin": int, 
+        "phMinusPumpRelayPin": int, 
+        "phPlusPumpRelayPin": int, 
+    },
+    "variables":{
+        "lightOnLuminosity": int, 
+        "waterRefillNoDelay": int,  
+        "stopWaterPumpOnLowLevel": int,  
+        "waterFillDelay": int,  
+        "waterPumpDefaultState": bool,  
+        "waterPumpConstantFlow": bool,  
+        "nutrientPump1FillDuration": int,  
+        "minimumNutrientLevel": int,  
+        "requiredNutrientLevel": int,  
+        "nutrientFillDelay": int,  
+        "phMinusPumpFillDuration": int,  
+        "phPlusPumpFillDuration": int,  
+        "triggerPhPlusPump": int,  
+        "triggerPhMinusPump": int, 
+        "optimalPh": int,  
+        "phFillDelay": int, 
     }
 }
 ```

@@ -19,6 +19,8 @@ int update_interval = 60000;
 
 long interruptTimer = 1000000;
 
+const int jsoncapacity = JSON_ARRAY_SIZE(2) + JSON_ARRAY_SIZE(11) + JSON_OBJECT_SIZE(16);
+
 /*
   ------------------ pin setup -------------------------------
   ! error color

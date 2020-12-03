@@ -1,13 +1,46 @@
-
-
 void loop()
 {
   DynamicJsonDocument json(1024);
   if (Serial.available() > 0)
   {
-    DynamicJsonDocument doc(1500);
+    StaticJsonDocument<jsoncapacity> doc;
     String data = Serial.readStringUntil('\n');
-    deserializeJson(doc, data);
+    DeserializationError err = deserializeJson(doc, data);
+    if (err)
+    {
+      Serial.print(F("deserializeJson() failed with code "));
+      Serial.println(err.c_str());
+    }
+    // pin assignment
+    PHSensorPin = doc["pins"]["PHSensorPin"] | A0;
+    TDSSensorPin = doc["pins"]["TDSSensorPin"] | A2;
+    LightSensorPin = doc["pins"]["LightSensorPin"] | A1;
+    waterTopLevelPin = doc["pins"]["waterTopLevelPin"] | 0;
+    waterBottomLevelPin = doc["pins"]["waterBottomLevelPin"] | 1;
+    flowSensorPin = doc["pins"]["flowSensorPin"] | 2;
+    waterTempPin = doc["pins"]["waterTempPin"] | 3;
+    waterFillSelonoidRelayPin = doc["pins"]["waterFillSelonoidRelayPin"] | 8;
+    waterPumpRelayPin = doc["pins"]["waterPumpRelayPin"] | 9;
+    nutrientPump1RelayPin = doc["pins"]["nutrientPump1RelayPin"] | 10;
+    phMinusPumpRelayPin = doc["pins"]["phMinusPumpRelayPin"] | 11;
+    phPlusPumpRelayPin = doc["pins"]["phPlusPumpRelayPin"] | 12;
+    // variables assignment
+    lightOnLuminosity = doc["variables"]["lightOnLuminosity"] | 1000;
+    waterRefillNoDelay = doc["variables"]["waterRefillNoDelay"] | false;
+    stopWaterPumpOnLowLevel = doc["variables"]["stopWaterPumpOnLowLevel"] | false;
+    waterFillDelay = doc["variables"]["waterFillDelay"] | 1200;
+    waterPumpDefaultState = doc["variables"]["waterPumpDefaultState"] | false;
+    waterPumpConstantFlow = doc["variables"]["waterPumpConstantFlow"] | false;
+    nutrientPump1FillDuration = doc["variables"]["nutrientPump1FillDuration"] | 5000000;
+    minimumNutrientLevel = doc["variables"]["minimumNutrientLevel"] | 1000;
+    requiredNutrientLevel = doc["variables"]["requiredNutrientLevel"] | 1500;
+    nutrientFillDelay = doc["variables"]["nutrientFillDelay"] | 900;
+    phMinusPumpFillDuration = doc["variables"]["phMinusPumpFillDuration"] | 5000000;
+    phPlusPumpFillDuration = doc["variables"]["phPlusPumpFillDuration"] | 5000000;
+    triggerPhPlusPump = doc["variables"]["triggerPhPlusPump"] | 4.5;
+    triggerPhMinusPump = doc["variables"]["triggerPhMinusPump"] | 6.5;
+    optimalPh = doc["variables"]["optimalPh"] | 5.5;
+    phFillDelay = doc["variables"]["phFillDelay"] | 900;
   }
 
   /*
