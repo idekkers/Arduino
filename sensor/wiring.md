@@ -17,8 +17,6 @@ It is preferable to use a common power and ground bus, that simplifies the wirin
 The arduino needs 7-20V of power, or you can connect it to a powerd hub together with the Pi,
 look at your arduino wiring diagram, and connect the 12V input to the VIn pin, 
 and the gnd pin to the ground common bus.
-Another option is to connect a 12V to USB converter to the Pi, and run the arduino on the USB cable that connects the Arduino to the Pi,
-providing it is only one Arduino, the Pi has a limited ability to supply power.
 
 all the sensors get thier power from the arduino 5V pin, so you can create a common bus for that too.
 
