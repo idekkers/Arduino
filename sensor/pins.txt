@@ -2,14 +2,14 @@ A0/18 - PH
 A1/19 - Light
 A2/20 - TDS
 A3/21 - 
-A4/22 - 
-A5/23 - 
+A4/22 - /SDA - RTC and BME
+A5/23 - /SCL - RTC and BME
 
 
 0/int - water top
 1/int - water bottom
-2/SDA - RTC and BME
-3/SCL - RTC and BME
+2
+3 - humidity
 4 - 
 5 - 
 6 - water temp
